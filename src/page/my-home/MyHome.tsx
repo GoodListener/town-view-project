@@ -1,7 +1,7 @@
 import MyElement3D from '@/components/r3f/MyElement3D'
 import { Canvas } from '@react-three/fiber'
 
-const Home = () => {
+const MyHome = () => {
   return (
     <Canvas
       camera={{
@@ -13,4 +13,4 @@ const Home = () => {
     </Canvas>
   )
 }
-export default Home
+export default MyHome
