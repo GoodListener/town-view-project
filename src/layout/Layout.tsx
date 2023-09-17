@@ -30,7 +30,7 @@ const Layout = () => {
         <Typography level="h3" component="h1">
           <Link to={'/'}>TOWN</Link>
         </Typography>
-        <Button onClick={handleClickLogin} size="sm">
+        <Button onClick={handleClickLogin} variant="plain" size="sm">
           Login
         </Button>
       </Sheet>

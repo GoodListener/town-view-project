@@ -1,4 +1,4 @@
-import { buildData } from '../data/exampleData'
+import { buildData } from '@/data/exampleData'
 import { useState } from 'react'
 
 export const useBrickState = () => {

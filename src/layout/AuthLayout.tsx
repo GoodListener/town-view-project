@@ -25,7 +25,9 @@ const AuthLayout = () => {
         <Typography level="h3" component="h1">
           <Link to={'/'}>TOWN</Link>
         </Typography>
-        <Button size="sm">Logout</Button>
+        <Button size="sm" variant="plain">
+          Logout
+        </Button>
       </Sheet>
       <Sheet
         sx={{
