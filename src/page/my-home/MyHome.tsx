@@ -1,16 +1,14 @@
 import World from '@/components/world/World'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Button, Card, CardContent, Sheet, Stack } from '@mui/joy'
+import { Canvas } from '@react-three/fiber'
+import { Button, Card, Sheet, Stack } from '@mui/joy'
 import { colorMap } from '@/utils'
 import { useRecoilState } from 'recoil'
 import { colorState, componentState } from '@/store'
-import Brick from '@/components/Brick'
 import { useEffect, useState } from 'react'
 import SelectableCard from '@/components/selectCard/SelectableCard'
 
 const MyHome = () => {
   const [color, setColor] = useRecoilState(colorState)
-  const [component, setComponent] = useRecoilState(componentState)
   const [turningAngle, setTurningAngle] = useState(0)
   const handleClickSave = () => {
     console.log('save')
@@ -60,7 +58,7 @@ const MyHome = () => {
         <Stack direction="row" gap={2}>
           <SelectableCard angle={turningAngle} type="rect" />
           <SelectableCard angle={turningAngle} type="square" />
-          <SelectableCard angle={turningAngle} type="triangle" />
+          <SelectableCard angle={turningAngle} type="big-square" />
         </Stack>
       </Card>
       <Card

@@ -3,8 +3,9 @@ import { Canvas } from '@react-three/fiber'
 import Brick from '@/components/Brick'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { colorState, componentState } from '@/store'
+import { BrickType } from '@/models/Brick.type'
 
-const SelectableCard = ({ angle, type }: { angle: number; type: string }) => {
+const SelectableCard = ({ angle, type }: { angle: number; type: BrickType }) => {
   const color = useRecoilValue(colorState)
   const [component, setComponent] = useRecoilState(componentState)
 

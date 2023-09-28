@@ -1,1 +1,1 @@
-export type BrickType = 'square' | 'rect' | 'roundRect' | 'triangle'
+export type BrickType = 'square' | 'rect' | 'roundRect' | 'big-square'

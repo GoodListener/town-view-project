@@ -4,8 +4,8 @@ export const getSizeOf = (type: BrickType): number[] => {
   switch (type) {
     case 'square':
       return [1, 1, 1]
-    case 'triangle':
-      return [1, 1, 1]
+    case 'big-square':
+      return [3, 1, 3]
     case 'rect':
       return [1, 1, 2]
     case 'roundRect':
@@ -13,6 +13,20 @@ export const getSizeOf = (type: BrickType): number[] => {
     default:
       return [1, 1, 1]
   }
+}
+
+export const checkBoxesOverlap = (
+  box1: { min: number[]; max: number[] },
+  box2: { min: number[]; max: number[] }
+): boolean => {
+  return !(
+    box2.min[0] >= box1.max[0] ||
+    box2.max[0] <= box1.min[0] ||
+    box2.min[1] >= box1.max[1] ||
+    box2.max[1] <= box1.min[1] ||
+    box2.min[2] >= box1.max[2] ||
+    box2.max[2] <= box1.min[2]
+  )
 }
 
 export const colorMap = {

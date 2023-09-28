@@ -3,11 +3,7 @@ import { getSizeOf } from '@/utils'
 import { BrickModel } from '@/models/Brick.model'
 
 const Brick = ({ position: initialPositionProps, type, color = '#fff', angle = 0 }: BrickModel) => {
-  const initialPosition = new Vector3(
-    initialPositionProps[0] + 0.5,
-    initialPositionProps[1] + 0.5,
-    initialPositionProps[2] + 0.5
-  ) // 초기 위치
+  const initialPosition = new Vector3(initialPositionProps[0], initialPositionProps[1], initialPositionProps[2]) // 초기 위치
   const size = getSizeOf(type)
 
   return (
