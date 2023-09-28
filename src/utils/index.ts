@@ -29,6 +29,39 @@ export const checkBoxesOverlap = (
   )
 }
 
+export const getDirection = (normal: { x: number; y: number; z: number }): 'e' | 'w' | 'n' | 's' => {
+  if (normal.x === 0 && normal.z === 0) return 'e'
+  if (normal.x !== 0) {
+    return normal.x > 0 ? 'e' : 'w'
+  } else {
+    return normal.z > 0 ? 'n' : 's'
+  }
+}
+
+export const getMinMax = (startPoints: number[], direction: 'e' | 'w' | 'n' | 's', sizes: number[]) => {
+  if (direction === 's') {
+    const min = [Math.floor(startPoints[0]), Math.floor(startPoints[1]), Math.floor(startPoints[2]) - sizes[2]]
+    const max = [min[0] + sizes[0], min[1] + sizes[1], Math.floor(startPoints[2])]
+    return { min, max }
+  } else if (direction === 'n') {
+    const min = [Math.floor(startPoints[0]), Math.floor(startPoints[1]), Math.floor(startPoints[2])]
+    const max = [min[0] + sizes[0], min[1] + sizes[1], min[2] + sizes[2]]
+    return { min, max }
+  } else if (direction === 'e') {
+    const min = [Math.floor(startPoints[0]), Math.floor(startPoints[1]), Math.floor(startPoints[2])]
+    const max = [min[0] + sizes[0], min[1] + sizes[1], min[2] + sizes[2]]
+    return { min, max }
+  } else if (direction === 'w') {
+    const min = [Math.floor(startPoints[0]) - sizes[0], Math.floor(startPoints[1]), Math.floor(startPoints[2])]
+    const max = [Math.floor(startPoints[0]), min[1] + sizes[1], min[2] + sizes[2]]
+    return { min, max }
+  } else {
+    const min = [Math.floor(startPoints[0]), Math.floor(startPoints[1]), Math.floor(startPoints[2])]
+    const max = [min[0] + sizes[0], min[1] + sizes[1], min[2] + sizes[2]]
+    return { min, max }
+  }
+}
+
 export const colorMap = {
   red: {
     default: '#F44336',

@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { Button, Card, Sheet, Stack } from '@mui/joy'
 import { colorMap } from '@/utils'
 import { useRecoilState } from 'recoil'
-import { colorState, componentState } from '@/store'
+import { colorState } from '@/store'
 import { useEffect, useState } from 'react'
 import SelectableCard from '@/components/selectCard/SelectableCard'
 
@@ -40,6 +40,7 @@ const MyHome = () => {
         </Button>
       </Sheet>
       <Canvas
+        id="worldCanvas"
         camera={{
           fov: 75,
           position: [5, 5, 0],

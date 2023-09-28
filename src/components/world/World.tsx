@@ -8,7 +8,7 @@ import { BrickModel } from '@/models/Brick.model'
 import { useFrame } from '@react-three/fiber'
 import { useRecoilValue } from 'recoil'
 import { colorState, componentState } from '@/store'
-import { checkBoxesOverlap, getSizeOf } from '@/utils'
+import { checkBoxesOverlap, getDirection, getMinMax, getSizeOf } from '@/utils'
 
 const World = () => {
   const color = useRecoilValue(colorState)
@@ -20,7 +20,7 @@ const World = () => {
   const [bricks, setBricks] = useBrickState()
 
   const handlePointerDown = (event: any) => {
-    if (event.target.nodeName !== 'CANVAS') return
+    if (event.target.parentNode.parentNode.id !== 'worldCanvas') return
     if (isOverlapped) return
 
     setBricks((bricks: BrickModel[]) =>
@@ -62,10 +62,9 @@ const World = () => {
     }
   })
 
-  const setRolloverInfo = (startPoints: number[]) => {
+  const setRolloverInfo = (startPoints: number[], direction: 'e' | 'w' | 'n' | 's') => {
     const sizes = getSizeOf(component.type)
-    const min = [Math.floor(startPoints[0]), Math.floor(startPoints[1]), Math.floor(startPoints[2])]
-    const max = [min[0] + sizes[0], min[1] + sizes[1], min[2] + sizes[2]]
+    const { min, max } = getMinMax(startPoints, direction, sizes)
     const position = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2]
 
     setRolloverMin(min)
@@ -83,16 +82,18 @@ const World = () => {
   const handlePointerMove = (intersect: THREE.Intersection) => {
     if (!intersect) return
 
-    setRolloverInfo([
-      intersect.object.position.x + (intersect.normal?.x || 0),
-      intersect.object.position.y + (intersect.normal?.y || 0),
-      intersect.object.position.z + (intersect.normal?.z || 0),
-    ])
+    const attachDirection = getDirection(intersect.normal)
+    /**
+     *  2. size 문제
+     */
+    console.log(attachDirection, intersect.point)
+
+    setRolloverInfo([intersect.point.x + 0.001, intersect.point.y + 0.001, intersect.point.z + 0.001], attachDirection)
   }
   const handlePointerMoveOnFloor = (floor: THREE.Intersection) => {
     if (!floor) return
 
-    setRolloverInfo([floor.point.x, floor.point.y + 0.5, floor.point.z])
+    setRolloverInfo([floor.point.x, floor.point.y + 0.5, floor.point.z], 'e')
   }
 
   return (
@@ -114,8 +115,9 @@ const World = () => {
       {bricks.map((brick: BrickModel, index: number) => {
         return <Brick key={index} {...brick} />
       })}
+
       <gridHelper args={[50, 50]} />
-      <axesHelper args={[10]} />
+      <axesHelper args={[10]} scale={10} />
     </>
   )
 }
