@@ -2,7 +2,7 @@ import { Environment, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { MathUtils, Vector3 } from 'three'
 import Brick from '@/components/Brick'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useBrickState } from '@/hooks/useBrickState'
 import { BrickModel } from '@/models/Brick.model'
 import { useFrame } from '@react-three/fiber'
@@ -20,6 +20,7 @@ const World = () => {
   const [bricks, setBricks] = useBrickState()
 
   const handlePointerDown = (event: any) => {
+    // pointer down up move 로 클릭이벤트 거르기
     if (event.target.parentNode.parentNode.id !== 'worldCanvas') return
     if (isOverlapped) return
 
@@ -71,6 +72,12 @@ const World = () => {
     setRolloverMax(max)
     setRolloverPosition(new Vector3(...position))
 
+    // optimization code
+    if (rolloverPosition.x === position[0] && rolloverPosition.y === position[1] && rolloverPosition.z === position[2])
+      return
+
+    console.log('opti')
+
     const isOverlapped = !!bricks.find((brick) => {
       if (brick.min && brick.max) {
         return checkBoxesOverlap(brick, { min, max })
@@ -86,7 +93,6 @@ const World = () => {
     /**
      *  2. size 문제
      */
-    console.log(attachDirection, intersect.point)
 
     setRolloverInfo([intersect.point.x + 0.001, intersect.point.y + 0.001, intersect.point.z + 0.001], attachDirection)
   }
@@ -95,6 +101,10 @@ const World = () => {
 
     setRolloverInfo([floor.point.x, floor.point.y + 0.5, floor.point.z], 'e')
   }
+
+  const bricksMemo = useMemo(() => {
+    return bricks.map((brick: BrickModel, index: number) => <Brick key={index} {...brick} />)
+  }, [bricks])
 
   return (
     <>
@@ -112,9 +122,7 @@ const World = () => {
         <meshStandardMaterial color={'#cccccc'} side={THREE.DoubleSide} />
       </mesh>
 
-      {bricks.map((brick: BrickModel, index: number) => {
-        return <Brick key={index} {...brick} />
-      })}
+      {bricksMemo}
 
       <gridHelper args={[50, 50]} />
       <axesHelper args={[10]} scale={10} />

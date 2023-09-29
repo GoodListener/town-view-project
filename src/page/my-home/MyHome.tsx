@@ -60,6 +60,9 @@ const MyHome = () => {
           <SelectableCard angle={turningAngle} type="rect" />
           <SelectableCard angle={turningAngle} type="square" />
           <SelectableCard angle={turningAngle} type="big-square" />
+          <SelectableCard angle={turningAngle} type="top4" />
+          <SelectableCard angle={turningAngle} type="long-rect" />
+          <SelectableCard angle={turningAngle} type="super-big-square" />
         </Stack>
       </Card>
       <Card

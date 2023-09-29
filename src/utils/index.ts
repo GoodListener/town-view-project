@@ -8,8 +8,12 @@ export const getSizeOf = (type: BrickType): number[] => {
       return [3, 1, 3]
     case 'rect':
       return [1, 1, 2]
-    case 'roundRect':
-      return [1, 1, 1]
+    case 'top4':
+      return [1, 4, 1]
+    case 'long-rect':
+      return [4, 1, 1]
+    case 'super-big-square':
+      return [7, 1, 7]
     default:
       return [1, 1, 1]
   }
