@@ -4,20 +4,17 @@ import { Button, Card, Sheet, Stack } from '@mui/joy'
 import { colorMap } from '@/utils'
 import { useRecoilState } from 'recoil'
 import { colorState } from '@/store'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import SelectableCard from '@/components/selectCard/SelectableCard'
 
 const MyHome = () => {
   const [color, setColor] = useRecoilState(colorState)
-  const [turningAngle, setTurningAngle] = useState(0)
   const handleClickSave = () => {
     console.log('save')
   }
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setTurningAngle((turningAngle) => turningAngle + 10)
-    }, 100)
+    const intervalId = setInterval(() => {}, 100)
 
     return () => {
       clearInterval(intervalId)
@@ -57,12 +54,12 @@ const MyHome = () => {
         }}
       >
         <Stack direction="row" gap={2}>
-          <SelectableCard angle={turningAngle} type="rect" />
-          <SelectableCard angle={turningAngle} type="square" />
-          <SelectableCard angle={turningAngle} type="big-square" />
-          <SelectableCard angle={turningAngle} type="top4" />
-          <SelectableCard angle={turningAngle} type="long-rect" />
-          <SelectableCard angle={turningAngle} type="super-big-square" />
+          <SelectableCard type="rect" />
+          <SelectableCard type="square" />
+          <SelectableCard type="big-square" />
+          <SelectableCard type="top4" />
+          <SelectableCard type="long-rect" />
+          <SelectableCard type="super-big-square" />
         </Stack>
       </Card>
       <Card

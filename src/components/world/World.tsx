@@ -1,49 +1,35 @@
 import { Environment, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { MathUtils, Vector3 } from 'three'
-import Brick from '@/components/Brick'
-import { useEffect, useMemo, useState } from 'react'
+import { BufferGeometry, MathUtils, Mesh, NormalBufferAttributes } from 'three'
+import Brick from '@/components/mesh/Brick'
+import { useRef } from 'react'
 import { useBrickState } from '@/hooks/useBrickState'
 import { BrickModel } from '@/models/Brick.model'
 import { useFrame } from '@react-three/fiber'
 import { useRecoilValue } from 'recoil'
 import { colorState, componentState } from '@/store'
 import { checkBoxesOverlap, getDirection, getMinMax, getSizeOf } from '@/utils'
+import ArcBrick from '@/components/mesh/ArcBrick'
 
 const World = () => {
   const color = useRecoilValue(colorState)
   const component = useRecoilValue(componentState)
-  const [rolloverPosition, setRolloverPosition] = useState<Vector3>(new Vector3(2, 0.5, 2))
-  const [rolloverMin, setRolloverMin] = useState<number[]>([0, 0, 0])
-  const [rolloverMax, setRolloverMax] = useState<number[]>([1, 1, 1])
-  const [isOverlapped, setIsOverlapped] = useState<boolean>(false)
+  const rolloverRef = useRef<Mesh<BufferGeometry<NormalBufferAttributes>>>(null)
   const [bricks, setBricks] = useBrickState()
 
-  const handlePointerDown = (event: any) => {
-    // pointer down up move 로 클릭이벤트 거르기
-    if (event.target.parentNode.parentNode.id !== 'worldCanvas') return
-    if (isOverlapped) return
-
+  const setPositioningBrick = (rollover: any) => {
     setBricks((bricks: BrickModel[]) =>
       bricks.concat([
         {
-          position: [rolloverPosition.x, rolloverPosition.y, rolloverPosition.z],
-          min: rolloverMin,
-          max: rolloverMax,
+          position: rollover.userData.position,
+          min: rollover.userData.min,
+          max: rollover.userData.max,
           type: component.type,
           color: color,
         },
       ])
     )
   }
-
-  useEffect(() => {
-    window.addEventListener('pointerdown', handlePointerDown)
-
-    return () => {
-      window.removeEventListener('pointerdown', handlePointerDown)
-    }
-  }, [rolloverPosition, handlePointerDown])
 
   useFrame((state) => {
     const children = state.scene.children
@@ -53,40 +39,45 @@ const World = () => {
       children.filter((child) => {
         return child.name === 'brick'
       }),
-      false
+      true
     )
+
     if (intersects.length > 0) {
-      handlePointerMove(intersects[0])
+      handleIntersectMove(intersects[0])
     } else {
       const floor = state.raycaster.intersectObjects(children.filter((child) => child.name === 'floor'))[0]
-      handlePointerMoveOnFloor(floor)
+      handleIntersectMoveOnFloor(floor)
     }
   })
 
   const setRolloverInfo = (startPoints: number[], direction: 'e' | 'w' | 'n' | 's') => {
+    if (!rolloverRef || !rolloverRef.current) return
+
     const sizes = getSizeOf(component.type)
     const { min, max } = getMinMax(startPoints, direction, sizes)
     const position = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2]
 
-    setRolloverMin(min)
-    setRolloverMax(max)
-    setRolloverPosition(new Vector3(...position))
-
-    // optimization code
-    if (rolloverPosition.x === position[0] && rolloverPosition.y === position[1] && rolloverPosition.z === position[2])
-      return
-
-    console.log('opti')
-
+    // collision detector 충돌감지 로직 최적화 필요
     const isOverlapped = !!bricks.find((brick) => {
       if (brick.min && brick.max) {
         return checkBoxesOverlap(brick, { min, max })
       }
     })
-    setIsOverlapped(isOverlapped)
+
+    rolloverRef.current.position.x = position[0]
+    rolloverRef.current.position.y = position[1]
+    rolloverRef.current.position.z = position[2]
+    rolloverRef.current.material.color = new THREE.Color(isOverlapped ? '#ff3333' : '#55cbea')
+    rolloverRef.current.userData = {
+      min,
+      max,
+      position,
+      isOverlapped,
+    }
+    if (isOverlapped) return
   }
 
-  const handlePointerMove = (intersect: THREE.Intersection) => {
+  const handleIntersectMove = (intersect: THREE.Intersection) => {
     if (!intersect) return
 
     const attachDirection = getDirection(intersect.normal)
@@ -96,15 +87,16 @@ const World = () => {
 
     setRolloverInfo([intersect.point.x + 0.001, intersect.point.y + 0.001, intersect.point.z + 0.001], attachDirection)
   }
-  const handlePointerMoveOnFloor = (floor: THREE.Intersection) => {
+  const handleIntersectMoveOnFloor = (floor: THREE.Intersection) => {
     if (!floor) return
 
     setRolloverInfo([floor.point.x, floor.point.y + 0.5, floor.point.z], 'e')
   }
 
-  const bricksMemo = useMemo(() => {
-    return bricks.map((brick: BrickModel, index: number) => <Brick key={index} {...brick} />)
-  }, [bricks])
+  const handleClick = () => {
+    if (rolloverRef?.current?.userData.isOverlapped) return
+    setPositioningBrick(rolloverRef.current)
+  }
 
   return (
     <>
@@ -112,9 +104,9 @@ const World = () => {
       <Environment background files={'/resting_place_4k.exr'} blur={0.5} />
       <fog attach="fog" color="#cccccc" near={10} far={100} />
 
-      <mesh position={rolloverPosition}>
+      <mesh ref={rolloverRef} onClick={handleClick}>
         <boxGeometry args={getSizeOf(component.type)} />
-        <meshStandardMaterial color={isOverlapped ? '#ff3333' : '#55cbea'} transparent={true} opacity={0.5} />
+        <meshStandardMaterial transparent={true} opacity={0.5} />
       </mesh>
 
       <mesh name="floor" rotation-x={MathUtils.degToRad(90)}>
@@ -122,7 +114,11 @@ const World = () => {
         <meshStandardMaterial color={'#cccccc'} side={THREE.DoubleSide} />
       </mesh>
 
-      {bricksMemo}
+      {bricks.map((brick: BrickModel, index: number) => (
+        <Brick key={index} {...brick} />
+      ))}
+
+      <ArcBrick position={[0, 0, 0]} min={[0, 0, 0]} max={[3, 3, 3]} />
 
       <gridHelper args={[50, 50]} />
       <axesHelper args={[10]} scale={10} />
