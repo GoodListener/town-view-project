@@ -10,6 +10,7 @@ import { useRecoilValue } from 'recoil'
 import { colorState, componentState } from '@/store'
 import { checkBoxesOverlap, getDirection, getMinMax, getSizeOf } from '@/utils'
 import ArcBrick from '@/components/mesh/ArcBrick'
+import PrismBrick from '@/components/mesh/PrismBrick'
 
 const World = () => {
   const color = useRecoilValue(colorState)
@@ -118,7 +119,7 @@ const World = () => {
         <Brick key={index} {...brick} />
       ))}
 
-      <ArcBrick position={[0, 0, 0]} min={[0, 0, 0]} max={[3, 3, 3]} />
+      <PrismBrick position={[0, 0, 0]} min={[0, 0, 0]} max={[3, 3, 3]} />
 
       <gridHelper args={[50, 50]} />
       <axesHelper args={[10]} scale={10} />
