@@ -60,6 +60,7 @@ const MyHome = () => {
           <SelectableCard type="top4" />
           <SelectableCard type="long-rect" />
           <SelectableCard type="super-big-square" />
+          <SelectableCard type="triangle" />
         </Stack>
       </Card>
       <Card

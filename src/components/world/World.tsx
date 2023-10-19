@@ -2,15 +2,14 @@ import { Environment, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { BufferGeometry, MathUtils, Mesh, NormalBufferAttributes } from 'three'
 import Brick from '@/components/mesh/Brick'
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { useBrickState } from '@/hooks/useBrickState'
 import { BrickModel } from '@/models/Brick.model'
 import { useFrame } from '@react-three/fiber'
 import { useRecoilValue } from 'recoil'
 import { colorState, componentState } from '@/store'
 import { checkBoxesOverlap, getDirection, getMinMax, getSizeOf } from '@/utils'
-import ArcBrick from '@/components/mesh/ArcBrick'
-import PrismBrick from '@/components/mesh/PrismBrick'
+import TrianglePrism from '@/components/mesh/ExtrudeBrick'
 
 const World = () => {
   const color = useRecoilValue(colorState)
@@ -56,6 +55,7 @@ const World = () => {
 
     const sizes = getSizeOf(component.type)
     const { min, max } = getMinMax(startPoints, direction, sizes)
+    console.log(min, max)
     const position = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2]
 
     // collision detector 충돌감지 로직 최적화 필요
@@ -67,12 +67,12 @@ const World = () => {
 
     rolloverRef.current.position.x = position[0]
     rolloverRef.current.position.y = position[1]
-    rolloverRef.current.position.z = position[2]
+    rolloverRef.current.position.z = position[2] - (component.type === 'triangle' ? 0.5 : 0)
     rolloverRef.current.material.color = new THREE.Color(isOverlapped ? '#ff3333' : '#55cbea')
     rolloverRef.current.userData = {
       min,
       max,
-      position,
+      position: [position[0], position[1], position[2] - (component.type === 'triangle' ? 0.5 : 0)],
       isOverlapped,
     }
     if (isOverlapped) return
@@ -99,6 +99,19 @@ const World = () => {
     setPositioningBrick(rolloverRef.current)
   }
 
+  const triangleShape = new THREE.Shape()
+  triangleShape.moveTo(-1, -0.5)
+  triangleShape.lineTo(1, -0.5)
+  triangleShape.lineTo(1, -0.3)
+  triangleShape.lineTo(-1, 0.5)
+  triangleShape.lineTo(-1, -0.5)
+
+  const extrudeSettings = {
+    steps: 1,
+    depth: 1,
+    bevelEnabled: false,
+  }
+
   return (
     <>
       <OrbitControls />
@@ -106,7 +119,11 @@ const World = () => {
       <fog attach="fog" color="#cccccc" near={10} far={100} />
 
       <mesh ref={rolloverRef} onClick={handleClick}>
-        <boxGeometry args={getSizeOf(component.type)} />
+        {component.type === 'triangle' ? (
+          <extrudeGeometry args={[triangleShape, extrudeSettings]} />
+        ) : (
+          <boxGeometry args={getSizeOf(component.type)} />
+        )}
         <meshStandardMaterial transparent={true} opacity={0.5} />
       </mesh>
 
@@ -115,11 +132,9 @@ const World = () => {
         <meshStandardMaterial color={'#cccccc'} side={THREE.DoubleSide} />
       </mesh>
 
-      {bricks.map((brick: BrickModel, index: number) => (
-        <Brick key={index} {...brick} />
-      ))}
-
-      <PrismBrick position={[0, 0, 0]} min={[0, 0, 0]} max={[3, 3, 3]} />
+      {bricks.map((brick: BrickModel, index: number) =>
+        brick.type === 'triangle' ? <TrianglePrism key={index} {...brick} /> : <Brick key={index} {...brick} />
+      )}
 
       <gridHelper args={[50, 50]} />
       <axesHelper args={[10]} scale={10} />

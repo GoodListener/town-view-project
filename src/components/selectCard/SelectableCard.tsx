@@ -4,6 +4,7 @@ import Brick from '@/components/mesh/Brick'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { colorState, componentState } from '@/store'
 import { BrickType } from '@/models/Brick.type'
+import TrianglePrism from '@/components/mesh/ExtrudeBrick'
 
 const SelectableCard = ({ angle, type }: { angle?: number; type: BrickType }) => {
   const color = useRecoilValue(colorState)
@@ -34,7 +35,11 @@ const SelectableCard = ({ angle, type }: { angle?: number; type: BrickType }) =>
           }}
         >
           <directionalLight color="#ffffff" intensity={3} position={[5, 5, 5]} target-position={[0, 0, 0]} />
-          <Brick position={[0, 0, 0]} type={type} angle={angle || 45} color={color} />
+          {type === 'triangle' ? (
+            <TrianglePrism position={[0, 0, 0]} type={type} angle={angle || 45} color={color} />
+          ) : (
+            <Brick position={[0, 0, 0]} type={type} angle={angle || 45} color={color} />
+          )}
         </Canvas>
       </CardContent>
     </Card>

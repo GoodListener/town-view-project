@@ -14,6 +14,8 @@ export const getSizeOf = (type: BrickType): number[] => {
       return [4, 1, 1]
     case 'super-big-square':
       return [7, 1, 7]
+    case 'triangle':
+      return [2, 1, 1]
     default:
       return [1, 1, 1]
   }

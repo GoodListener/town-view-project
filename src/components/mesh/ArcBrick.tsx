@@ -1,5 +1,5 @@
-import { BufferGeometry, MathUtils, PolyhedronGeometry, Vector3 } from 'three'
-import { Face3 } from 'three/examples/jsm/deprecated/Geometry'
+import { MathUtils, Vector3 } from 'three'
+import * as THREE from 'three'
 
 interface ArcBrickModel {
   position: number[]
@@ -20,59 +20,15 @@ const ArcBrick = ({ position: initialPositionProps, min, max, color = '#fff', an
   // 오목한 아크 형태의 면을 정의합니다.
 
   const vertices = [
-    0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.25, 0.25, -0.5, -0.25, 0.25, -0.5, -0.25, -0.25,
-    -0.5, 0.25, -0.25, -0.5,
+    0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0.25, 0.25, -0.25, 0.75, 0.25, -0.25, 0.75, 0.75, -0.25, 0.25, 0.75, -0.25,
   ]
 
-  const indices = [
-    0,
-    1,
-    5,
-    0,
-    5,
-    4, // Front face
-    1,
-    2,
-    6,
-    1,
-    6,
-    5, // Right face
-    2,
-    3,
-    7,
-    2,
-    7,
-    6, // Back face
-    3,
-    0,
-    4,
-    3,
-    4,
-    7, // Left face
-    0,
-    1,
-    2,
-    0,
-    2,
-    3, // Top face
-    4,
-    5,
-    6,
-    4,
-    6,
-    7, // Bottom face
-    1,
-    0,
-    3,
-    1,
-    3,
-    2, // Inner face
-  ]
+  const indices = [0, 1, 5, 0, 5, 4, 1, 2, 6, 1, 6, 5, 2, 3, 7, 2, 7, 6, 3, 0, 4, 3, 4, 7, 4, 5, 6, 6, 7, 4]
 
   return (
     <group name="brick">
-      <mesh name="brickMesh" position={[3, 3, 3]} rotation-y={MathUtils.degToRad(angle)}>
-        <polyhedronGeometry args={[vertices, indices, 1, 2]} />
+      <mesh name="brickMesh" position={[3, 10, 3]} rotation-y={MathUtils.degToRad(angle)}>
+        <polyhedronGeometry args={[vertices, indices, 3, 1]} />
         <meshStandardMaterial color={color} metalness={0} roughness={0} />
       </mesh>
     </group>
