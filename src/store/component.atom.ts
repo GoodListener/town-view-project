@@ -2,8 +2,9 @@ import { atom } from 'recoil'
 import { BrickType } from '@/models/Brick.type'
 
 interface ComponentModel {
-  component: 'brick' // todo: 구성요소 늘리기
+  component: 'brick'
   type: BrickType
+  angle: number
 }
 
 export const componentState = atom<ComponentModel>({
@@ -11,5 +12,6 @@ export const componentState = atom<ComponentModel>({
   default: {
     component: 'brick',
     type: 'rect',
+    angle: 0,
   }, // default value (aka initial value)
 })

@@ -3,23 +3,28 @@ import { Canvas } from '@react-three/fiber'
 import { Button, Card, Sheet, Stack } from '@mui/joy'
 import { colorMap } from '@/utils'
 import { useRecoilState } from 'recoil'
-import { colorState } from '@/store'
+import { colorState, componentState } from '@/store'
 import { useEffect } from 'react'
 import SelectableCard from '@/components/selectCard/SelectableCard'
 
 const MyHome = () => {
   const [color, setColor] = useRecoilState(colorState)
+  const [component, setComponent] = useRecoilState(componentState)
   const handleClickSave = () => {
     console.log('save')
   }
 
   useEffect(() => {
-    const intervalId = setInterval(() => {}, 100)
+    const handleKeypressR = (event: any) => {
+      if (event.key.toLowerCase() === 'r') setComponent({ ...component, angle: (component.angle % 360) + 90 })
+    }
+
+    window.addEventListener('keypress', handleKeypressR)
 
     return () => {
-      clearInterval(intervalId)
+      window.removeEventListener('keypress', handleKeypressR)
     }
-  }, [])
+  }, [component])
 
   return (
     <>

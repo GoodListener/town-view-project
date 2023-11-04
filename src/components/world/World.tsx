@@ -9,15 +9,16 @@ import { useFrame } from '@react-three/fiber'
 import { useRecoilValue } from 'recoil'
 import { colorState, componentState } from '@/store'
 import { checkBoxesOverlap, getDirection, getMinMax, getSizeOf } from '@/utils'
-import TrianglePrism from '@/components/mesh/ExtrudeBrick'
+import TrianglePrismBrick from '@/components/mesh/TrianglePrismBrick'
 
+type Rollover = Mesh<BufferGeometry<NormalBufferAttributes>>
 const World = () => {
   const color = useRecoilValue(colorState)
   const component = useRecoilValue(componentState)
-  const rolloverRef = useRef<Mesh<BufferGeometry<NormalBufferAttributes>>>(null)
+  const rolloverRef = useRef<Rollover>(null)
   const [bricks, setBricks] = useBrickState()
 
-  const setPositioningBrick = (rollover: any) => {
+  const setPositioningBrick = (rollover: Rollover) => {
     setBricks((bricks: BrickModel[]) =>
       bricks.concat([
         {
@@ -25,6 +26,7 @@ const World = () => {
           min: rollover.userData.min,
           max: rollover.userData.max,
           type: component.type,
+          angle: component.angle,
           color: color,
         },
       ])
@@ -54,25 +56,27 @@ const World = () => {
     if (!rolloverRef || !rolloverRef.current) return
 
     const sizes = getSizeOf(component.type)
-    const { min, max } = getMinMax(startPoints, direction, sizes)
-    console.log(min, max)
+
+    const { min, max } = getMinMax(startPoints, direction, component.angle % 180 > 0 ? sizes.reverse() : sizes)
     const position = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2]
 
     // collision detector 충돌감지 로직 최적화 필요
     const isOverlapped = !!bricks.find((brick) => {
       if (brick.min && brick.max) {
-        return checkBoxesOverlap(brick, { min, max })
+        return checkBoxesOverlap({ min: brick.min, max: brick.max }, { min, max })
       }
     })
 
     rolloverRef.current.position.x = position[0]
     rolloverRef.current.position.y = position[1]
-    rolloverRef.current.position.z = position[2] - (component.type === 'triangle' ? 0.5 : 0)
+    rolloverRef.current.position.z = position[2]
     rolloverRef.current.material.color = new THREE.Color(isOverlapped ? '#ff3333' : '#55cbea')
+    rolloverRef.current.rotation.y = MathUtils.degToRad(component.angle)
+
     rolloverRef.current.userData = {
       min,
       max,
-      position: [position[0], position[1], position[2] - (component.type === 'triangle' ? 0.5 : 0)],
+      position: [position[0], position[1], position[2]],
       isOverlapped,
     }
     if (isOverlapped) return
@@ -80,31 +84,27 @@ const World = () => {
 
   const handleIntersectMove = (intersect: THREE.Intersection) => {
     if (!intersect) return
+    if (!intersect.normal) return
 
     const attachDirection = getDirection(intersect.normal)
-    /**
-     *  2. size 문제
-     */
-
     setRolloverInfo([intersect.point.x + 0.001, intersect.point.y + 0.001, intersect.point.z + 0.001], attachDirection)
   }
   const handleIntersectMoveOnFloor = (floor: THREE.Intersection) => {
     if (!floor) return
-
     setRolloverInfo([floor.point.x, floor.point.y + 0.5, floor.point.z], 'e')
   }
 
   const handleClick = () => {
-    if (rolloverRef?.current?.userData.isOverlapped) return
+    if (!rolloverRef.current || rolloverRef?.current?.userData.isOverlapped) return
     setPositioningBrick(rolloverRef.current)
   }
 
   const triangleShape = new THREE.Shape()
-  triangleShape.moveTo(-1, -0.5)
-  triangleShape.lineTo(1, -0.5)
-  triangleShape.lineTo(1, -0.3)
-  triangleShape.lineTo(-1, 0.5)
-  triangleShape.lineTo(-1, -0.5)
+  triangleShape.moveTo(0 - 0.5, 0 - 0.5)
+  triangleShape.lineTo(0 - 0.5, 1 - 0.5)
+  triangleShape.lineTo(2 - 0.5, 0.2 - 0.5)
+  triangleShape.lineTo(2 - 0.5, 0 - 0.5)
+  triangleShape.lineTo(0 - 0.5, 0 - 0.5)
 
   const extrudeSettings = {
     steps: 1,
@@ -133,7 +133,7 @@ const World = () => {
       </mesh>
 
       {bricks.map((brick: BrickModel, index: number) =>
-        brick.type === 'triangle' ? <TrianglePrism key={index} {...brick} /> : <Brick key={index} {...brick} />
+        brick.type === 'triangle' ? <TrianglePrismBrick key={index} {...brick} /> : <Brick key={index} {...brick} />
       )}
 
       <gridHelper args={[50, 50]} />
